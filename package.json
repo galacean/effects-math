@@ -1,0 +1,67 @@
+{
+  "name": "@galacean/effects-math",
+  "version": "1.0.0",
+  "description": "Javascript Math library for High Performance WebGL apps",
+  "files": [
+    "es"
+  ],
+  "exports": {
+    "./*": {
+      "import": "./*.js",
+      "types": "./*.d.ts"
+    }
+  },
+  "scripts": {
+    "prebuild": "npm run clean:all",
+    "build": "npm run build:lib",
+    "build:lib": "tsc -b tsconfig.build.json",
+    "build:docs": "pnpm build && typedoc",
+    "lint": "eslint --ext .ts .",
+    "lint:fix": "eslint --fix --ext .ts .",
+    "check:ts": "tsc -b tsconfig.check.json",
+    "clean:all": "npm run clean:lib",
+    "clean:lib": "rm -rf es/**",
+    "test": "jest",
+    "test:watch": "jest --watch --notify",
+    "prepare": "husky install",
+    "prepublishOnly": "pnpm build"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^13.2.1",
+    "@commitlint/config-conventional": "^13.2.0",
+    "@rollup/plugin-commonjs": "^21.0.3",
+    "@rollup/plugin-node-resolve": "^13.1.3",
+    "@rollup/plugin-typescript": "^8.3.1",
+    "@types/jest": "^29.5.4",
+    "@types/node": "^17.0.21",
+    "@typescript-eslint/eslint-plugin": "^5.62.0",
+    "@typescript-eslint/parser": "^5.62.0",
+    "eslint": "^8.42.0",
+    "eslint-plugin-promise": "^6.1.1",
+    "husky": "^7.0.4",
+    "jest": "^29.6.4",
+    "lint-staged": "^11.2.6",
+    "pnpm": "^8.5.0",
+    "rimraf": "^3.0.2",
+    "ts-jest": "^29.1.1",
+    "typedoc": "^0.25.1",
+    "typescript": "^5.1.3"
+  },
+  "engines": {
+    "node": ">=10.0.0"
+  },
+  "contributors": [
+    {
+      "name": "飂兮"
+    },
+    {
+      "name": "赤芍"
+    }
+  ],
+  "author": "Ant Group CO., Ltd.",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  }
+}

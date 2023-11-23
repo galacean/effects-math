@@ -1,0 +1,10 @@
+{
+  "{src,__tests__}/**/*.ts": [
+    "eslint --cache --fix",
+    "jest --findRelatedTests",
+    "sh -c 'tsc -b tsconfig.check.json'"
+  ],
+  "__tests__/**/*.spec.ts": [
+    "jest"
+  ]
+}

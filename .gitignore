@@ -1,0 +1,11 @@
+node_modules
+coverage
+.DS_Store
+dist
+es
+lib
+api
+*.local
+*.tgz
+.eslintcache
+.history
