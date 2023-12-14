@@ -439,11 +439,9 @@ export class Matrix4 {
     const vY = Matrix4.tempVec1;
     const vZ = Matrix4.tempVec2;
 
-    vZ.subtractVectors(target, eye);
+    vZ.subtractVectors(eye, target);
     vZ.normalize();
-    vY.copyFrom(up);
-    vY.normalize();
-    vX.crossVectors(vY, vZ);
+    vX.crossVectors(up, vZ);
     vX.normalize();
     vY.crossVectors(vZ, vX);
 

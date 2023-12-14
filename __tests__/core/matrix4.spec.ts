@@ -183,20 +183,29 @@ describe('Maths', () => {
 
     it('lookAt', () => {
       const a = new Matrix4();
-      const expected = new Matrix4().identity();
+      const b = new Matrix4(
+        1, 0, 0, 0,
+        0, 0.7071067811865475, -0.7071067811865475, 0,
+        0, 0.7071067811865475, 0.7071067811865475, 0,
+        0, 0, 0, 1
+      );
       const eye = new Vector3(0, 0, 0);
       const target = new Vector3(0, 1, - 1);
       const up = new Vector3(0, 1, 0);
 
       a.lookAt(eye, target, up);
-      const rotation = new Euler().setFromRotationMatrix4(a);
+      expect(a.equals(b)).toEqual(true);
 
-      expect(rotation.x).toEqual(135);
-
-      // eye and target are in the same position
-      eye.copyFrom(target);
+      eye.set(0, 0, -5);
+      target.set(0, 0, 5);
       a.lookAt(eye, target, up);
-      expect(matrixEquals4(a, expected)).toEqual(true);
+      b.set(
+        -1, 0, 0, 0,
+        0, 1, 0, 0,
+        0, 0, -1, 0,
+        0, 0, -5, 1
+      );
+      expect(a.equals(b)).toEqual(true);
     });
 
     it('multiply', () => {
