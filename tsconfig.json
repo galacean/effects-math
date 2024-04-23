@@ -22,7 +22,7 @@
     "allowSyntheticDefaultImports": true,
     "moduleResolution": "node",
     "module": "ESNext",
-    "target": "ES6",
+    "target": "ESNext",
     "lib": [
       "DOM",
       "ESNext"
