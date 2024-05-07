@@ -450,6 +450,26 @@ describe('Maths', () => {
       expect(b.equals(a)).toEqual(true);
     });
 
+    it('setFromVector4', () => {
+      const a = new Quaternion();
+
+      a.setFromVector4(new Vector4(x, y, z, w));
+      expect(a.x).toEqual(x);
+      expect(a.y).toEqual(y);
+      expect(a.z).toEqual(z);
+      expect(a.w).toEqual(w);
+    });
+
+    it('toVector4', () => {
+      const a = new Quaternion(x, y, z, w);
+      const b = a.toVector4(new Vector4());
+
+      expect(b.x).toEqual(x);
+      expect(b.y).toEqual(y);
+      expect(b.z).toEqual(z);
+      expect(b.w).toEqual(w);
+    });
+
     it('setFromArray', () => {
       const a = new Quaternion();
 
