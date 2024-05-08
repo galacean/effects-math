@@ -3,6 +3,7 @@ import type { Matrix4 } from './matrix4';
 import { clamp } from './utils';
 import { Vector3 } from './vector3';
 import type { Vector4 } from './vector4';
+import type { Vector4Like } from './type';
 
 /**
  * 四元数
@@ -69,6 +70,20 @@ export class Quaternion {
     this.y = v.y * s;
     this.z = v.z * s;
     this.w = Math.cos(halfAngle);
+
+    return this;
+  }
+
+  /**
+   * 通过 Vector4Like 创建四元数
+   * @param v - Vector4Like
+   * @returns
+   */
+  setFromVector4 (v: Vector4Like): this {
+    this.x = v.x;
+    this.y = v.y;
+    this.z = v.z;
+    this.w = v.w;
 
     return this;
   }
@@ -185,7 +200,7 @@ export class Quaternion {
    * @param quat - 拷贝目标四元数
    * @returns 拷贝四元数
    */
-  copyFrom (quat: Quaternion): this {
+  copyFrom (quat: Quaternion | Vector4Like): this {
     this.x = quat.x;
     this.y = quat.y;
     this.z = quat.z;
@@ -523,7 +538,16 @@ export class Quaternion {
   }
 
   /**
-   * 通过数组获取四元数
+   * 通过 Vector4Like 创建四元数
+   * @param v - Vector4Like
+   * @returns 四元数
+   */
+  static fromVector4 (v: Vector4Like): Quaternion {
+    return new Quaternion().setFromVector4(v);
+  }
+
+  /**
+   * 通过数组创建四元数
    * @param array - 数组
    * @param [offset=0] - 起始偏移值
    * @returns 四元数
