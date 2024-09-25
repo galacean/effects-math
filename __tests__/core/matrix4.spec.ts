@@ -652,8 +652,6 @@ describe('Maths', () => {
       expect(scale.y).toBeCloseTo(0, 5);
       expect(scale.z).toBeCloseTo(1, 5);
     });
-
-    [];
   });
 });
 
