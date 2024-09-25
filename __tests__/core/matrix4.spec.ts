@@ -631,6 +631,29 @@ describe('Maths', () => {
         expect(m).toBeCloseTo(matrixArray[i], 5);
       });
     });
+
+    it('特殊分解', () => {
+      const translation = new Vector3();
+      const rotation = new Quaternion();
+      const scale = new Vector3();
+      const matrix = new Matrix4(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 2.3145968103448453, 5.4677423060188755, 0, 1);
+
+      matrix.decompose(translation, rotation, scale);
+      expect(translation.x).toBeCloseTo(2.3145968103448453, 5);
+      expect(translation.y).toBeCloseTo(5.4677423060188755, 5);
+      expect(translation.z).toBeCloseTo(0, 5);
+
+      expect(rotation.x).toBeCloseTo(0, 5);
+      expect(rotation.y).toBeCloseTo(0, 5);
+      expect(rotation.z).toBeCloseTo(0, 5);
+      expect(rotation.w).toBeCloseTo(1, 5);
+
+      expect(scale.x).toBeCloseTo(0, 5);
+      expect(scale.y).toBeCloseTo(0, 5);
+      expect(scale.z).toBeCloseTo(1, 5);
+    });
+
+    [];
   });
 });
 

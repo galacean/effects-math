@@ -777,6 +777,16 @@ export class Matrix4 {
     translation.y = te[13];
     translation.z = te[14];
 
+    scale.x = sx;
+    scale.y = sy;
+    scale.z = sz;
+
+    if (Math.abs(sx) < 1e-8 || Math.abs(sy) < 1e-8 || Math.abs(sz) < 1e-8) {
+      rotation.set(0, 0, 0, 1);
+
+      return this;
+    }
+
     // scale the rotation part
     const m = Matrix4.tempMat0;
 
@@ -799,10 +809,6 @@ export class Matrix4 {
     m.elements[10] *= invSZ;
 
     rotation.setFromRotationMatrix(m);
-
-    scale.x = sx;
-    scale.y = sy;
-    scale.z = sz;
 
     return this;
   }

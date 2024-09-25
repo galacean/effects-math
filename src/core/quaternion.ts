@@ -443,8 +443,8 @@ export class Quaternion {
    * @param qb - 四元数
    * @param t - 插值比
    */
-  slerpQuaternions (qa: Quaternion, qb: Quaternion, t: number) {
-    this.copyFrom(qa).slerp(qb, t);
+  slerpQuaternions (qa: Quaternion, qb: Quaternion, t: number): this {
+    return this.copyFrom(qa).slerp(qb, t);
   }
 
   /**
