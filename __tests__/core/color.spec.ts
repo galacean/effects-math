@@ -272,7 +272,6 @@ describe('Maths', () => {
       c.setElement(1, 0.5);
       c.setElement(2, 0.7);
       c.setElement(3, 0.9);
-      c.setElement(4, 1.0);
 
       expect(Math.abs(c.getElement(0) - 0.2) < 1e-5).toEqual(true);
       expect(Math.abs(c.getElement(1) - 0.5) < 1e-5).toEqual(true);
