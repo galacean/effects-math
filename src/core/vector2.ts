@@ -499,6 +499,33 @@ export class Vector2 {
   }
 
   /**
+   * 计算向量相对于正 x 轴的角度（弧度）
+   * @returns 弧度值
+   */
+  angle (): number {
+    const angle = Math.atan2(-this.y, -this.x) + Math.PI;
+
+    return angle;
+  }
+
+  /**
+   * 绕指定中心点旋转向量
+   * @param center - 旋转中心
+   * @param angle - 旋转角度（弧度）
+   * @returns 旋转结果
+   */
+  rotateAround (center: Vector2, angle: number): this {
+    const c = Math.cos(angle), s = Math.sin(angle);
+    const x = this.x - center.x;
+    const y = this.y - center.y;
+
+    this.x = x * c - y * s + center.x;
+    this.y = x * s + y * c + center.y;
+
+    return this;
+  }
+
+  /**
    * 随机生成向量
    * @returns 向量
    */

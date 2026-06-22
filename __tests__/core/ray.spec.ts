@@ -1,4 +1,4 @@
-import { Ray, Box3, Vector3, Sphere, Matrix4 } from '@galacean/effects-math';
+import { Ray, Box3, Vector3, Sphere, Matrix4, Plane } from '@galacean/effects-math';
 
 const eps = 0.0001;
 const zero3 = new Vector3();
@@ -258,6 +258,39 @@ describe('Maths', () => {
       ray.direction.multiply(- 1);
       ray.intersectTriangle(triangle0, point.copyFrom(posInf3), false);
       expect(point.equals(posInf3)).toEqual(true);
+    });
+
+    it('distanceToPlane', () => {
+      // 平面方程: normal·p + distance = 0
+      // Plane 构造函数会 normalize normal 并调整 distance
+      // new Plane(-10, (0,1,0)) → normal=(0,1,0), distance=-10 → y - 10 = 0 → y = 10
+
+      // 光线从原点沿 +y 方向，平面在 y=10 → 相交于 y=10
+      const ray = new Ray(new Vector3(0, 0, 0), new Vector3(0, 1, 0));
+      const plane = new Plane(-10, new Vector3(0, 1, 0));
+      const dist = ray.distanceToPlane(plane);
+
+      expect(dist).toBeCloseTo(10, 5);
+
+      // 光线与平面平行且不在平面上 → null
+      const parallelRay = new Ray(new Vector3(0, 0, 0), new Vector3(1, 0, 0));
+      const verticalPlane = new Plane(-10, new Vector3(0, 1, 0));
+
+      expect(parallelRay.distanceToPlane(verticalPlane)).toBeNull();
+
+      // 光线与平面平行且在平面上 → 0
+      // 平面 y - 10 = 0，光线起点在 y=10
+      const onPlaneRay = new Ray(new Vector3(0, 10, 0), new Vector3(1, 0, 0));
+      const onPlanePlane = new Plane(-10, new Vector3(0, 1, 0));
+
+      expect(onPlaneRay.distanceToPlane(onPlanePlane)).toEqual(0);
+
+      // 光线背面相交 → null（t < 0）
+      // 光线从 y=20 沿 +y 方向，平面在 y=10，背面相交
+      const backRay = new Ray(new Vector3(0, 20, 0), new Vector3(0, 1, 0));
+      const backPlane = new Plane(-10, new Vector3(0, 1, 0));
+
+      expect(backRay.distanceToPlane(backPlane)).toBeNull();
     });
 
     it('applyMatrix4', () => {

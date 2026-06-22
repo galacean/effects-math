@@ -655,6 +655,31 @@ export class Vector3 {
   }
 
   /**
+   * 从四维矩阵提取平移分量
+   * @param m - 四维矩阵
+   * @returns 向量
+   */
+  setFromMatrixPosition (m: Matrix4): this {
+    const e = m.elements;
+
+    this.x = e[12];
+    this.y = e[13];
+    this.z = e[14];
+
+    return this;
+  }
+
+  /**
+   * 从四维矩阵提取指定列的三维分量
+   * @param m - 四维矩阵
+   * @param index - 列下标
+   * @returns 向量
+   */
+  setFromMatrixColumn (m: Matrix4, index: number): this {
+    return this.setFromArray(m.elements, index * 4);
+  }
+
+  /**
    * 通过标量数值创建向量
    * @param num - 数值
    * @returns 向量
