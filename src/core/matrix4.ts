@@ -777,6 +777,16 @@ export class Matrix4 {
     translation.y = te[13];
     translation.z = te[14];
 
+    scale.x = sx;
+    scale.y = sy;
+    scale.z = sz;
+
+    if (Math.abs(sx) < 1e-8 || Math.abs(sy) < 1e-8 || Math.abs(sz) < 1e-8) {
+      rotation.set(0, 0, 0, 1);
+
+      return this;
+    }
+
     // scale the rotation part
     const m = Matrix4.tempMat0;
 
@@ -800,10 +810,6 @@ export class Matrix4 {
 
     rotation.setFromRotationMatrix(m);
 
-    scale.x = sx;
-    scale.y = sy;
-    scale.z = sz;
-
     return this;
   }
 
@@ -821,6 +827,56 @@ export class Matrix4 {
       Math.hypot(te[4], te[5], te[6]),
       Math.hypot(te[8], te[9], te[10])
     );
+  }
+
+  /**
+   * 提取矩阵的旋转部分（去除缩放）
+   * @param m - 源矩阵
+   * @returns 矩阵
+   */
+  extractRotation (m: Matrix4): this {
+    const v = Matrix4.tempVec0;
+    const me = m.elements;
+    const te = this.elements;
+
+    const scaleX = 1 / v.set(me[0], me[1], me[2]).length();
+    const scaleY = 1 / v.set(me[4], me[5], me[6]).length();
+    const scaleZ = 1 / v.set(me[8], me[9], me[10]).length();
+
+    te[0] = me[0] * scaleX;
+    te[1] = me[1] * scaleX;
+    te[2] = me[2] * scaleX;
+    te[3] = 0;
+
+    te[4] = me[4] * scaleY;
+    te[5] = me[5] * scaleY;
+    te[6] = me[6] * scaleY;
+    te[7] = 0;
+
+    te[8] = me[8] * scaleZ;
+    te[9] = me[9] * scaleZ;
+    te[10] = me[10] * scaleZ;
+    te[11] = 0;
+
+    te[12] = 0;
+    te[13] = 0;
+    te[14] = 0;
+    te[15] = 1;
+
+    return this;
+  }
+
+  /**
+   * 设置矩阵的平移部分（不影响旋转和缩放）
+   * @param v - 平移向量
+   * @returns 矩阵
+   */
+  setPosition (v: Vector3): this {
+    this.elements[12] = v.x;
+    this.elements[13] = v.y;
+    this.elements[14] = v.z;
+
+    return this;
   }
 
   /**

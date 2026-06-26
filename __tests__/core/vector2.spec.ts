@@ -298,6 +298,46 @@ describe('Maths', () => {
       expect(a.y).toEqual(0);
     });
 
+    it('angle', () => {
+      const a = new Vector2(1, 0);
+
+      expect(a.angle()).toBeCloseTo(0, 5);
+
+      const b = new Vector2(0, 1);
+
+      expect(b.angle()).toBeCloseTo(Math.PI / 2, 5);
+
+      const c = new Vector2(-1, 0);
+
+      expect(c.angle()).toBeCloseTo(Math.PI, 5);
+
+      const d = new Vector2(0, -1);
+
+      expect(d.angle()).toBeCloseTo(Math.PI * 1.5, 5);
+
+      const e = new Vector2(1, 1);
+
+      expect(e.angle()).toBeCloseTo(Math.PI / 4, 5);
+    });
+
+    it('rotateAround', () => {
+      // 绕 (1,0) 旋转 90°
+      const v = new Vector2(2, 0);
+
+      v.rotateAround(new Vector2(1, 0), Math.PI / 2);
+      // (2-1, 0-0) → (1, 0), 旋转 90° → (0, 1), + center → (1, 1)
+      expect(v.x).toBeCloseTo(1, 5);
+      expect(v.y).toBeCloseTo(1, 5);
+
+      // 绕 (1,0) 旋转 180°
+      const v2 = new Vector2(3, 0);
+
+      v2.rotateAround(new Vector2(1, 0), Math.PI);
+      // (3-1, 0-0) → (2, 0), 旋转 180° → (-2, 0), + center → (-1, 0)
+      expect(v2.x).toBeCloseTo(-1, 5);
+      expect(v2.y).toBeCloseTo(0, 5);
+    });
+
     it('multiply/divide', () => {
       const a = new Vector2(x, y);
       const b = new Vector2(2 * x, 2 * y);

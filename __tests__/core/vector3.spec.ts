@@ -446,6 +446,45 @@ describe('Maths', () => {
       expect(a.lengthSquared()).toEqual((x * x + y * y + z * z));
     });
 
+    it('setFromMatrixPosition', () => {
+      // 列优先构造：第4列为平移分量 (10, 20, 30, 1)
+      const m = new Matrix4(
+        1, 0, 0, 0,
+        0, 1, 0, 0,
+        0, 0, 1, 0,
+        10, 20, 30, 1,
+      );
+      const v = new Vector3().setFromMatrixPosition(m);
+
+      expect(v.x).toEqual(10);
+      expect(v.y).toEqual(20);
+      expect(v.z).toEqual(30);
+    });
+
+    it('setFromMatrixColumn', () => {
+      // 列优先构造：
+      // col0: {0, 4, 8, 12}, col1: {1, 5, 9, 13}, col2: {2, 6, 10, 14}, col3: {3, 7, 11, 15}
+      const m = new Matrix4(
+        0, 4, 8, 12,
+        1, 5, 9, 13,
+        2, 6, 10, 14,
+        3, 7, 11, 15,
+      );
+      // column 0: elements[0..3] = {0, 4, 8, 12} → Vector3 取前三项
+      const col0 = new Vector3().setFromMatrixColumn(m, 0);
+
+      expect(col0.x).toEqual(0);
+      expect(col0.y).toEqual(4);
+      expect(col0.z).toEqual(8);
+
+      // column 1: elements[4..7] = {1, 5, 9, 13}
+      const col1 = new Vector3().setFromMatrixColumn(m, 1);
+
+      expect(col1.x).toEqual(1);
+      expect(col1.y).toEqual(5);
+      expect(col1.z).toEqual(9);
+    });
+
     it('lerp/clone', () => {
       const a = new Vector3(x, 0, z);
       const b = new Vector3(0, - y, 0);

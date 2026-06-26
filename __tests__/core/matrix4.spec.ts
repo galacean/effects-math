@@ -631,6 +631,71 @@ describe('Maths', () => {
         expect(m).toBeCloseTo(matrixArray[i], 5);
       });
     });
+
+    it('extractRotation', () => {
+      const m = new Matrix4().compose(
+        new Vector3(1, 2, 3),
+        new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), Math.PI / 4),
+        new Vector3(2, 3, 4),
+      );
+      const r = new Matrix4().extractRotation(m);
+
+      // 旋转部分应不受缩放影响
+      const rElements = r.elements;
+
+      // 平移部分应全为 0
+      expect(rElements[12]).toEqual(0);
+      expect(rElements[13]).toEqual(0);
+      expect(rElements[14]).toEqual(0);
+      expect(rElements[15]).toEqual(1);
+      // 旋转列应被归一化（去除缩放）
+      const col0Length = Math.sqrt(rElements[0] * rElements[0] + rElements[1] * rElements[1] + rElements[2] * rElements[2]);
+
+      expect(col0Length).toBeCloseTo(1, 5);
+      const col1Length = Math.sqrt(rElements[4] * rElements[4] + rElements[5] * rElements[5] + rElements[6] * rElements[6]);
+
+      expect(col1Length).toBeCloseTo(1, 5);
+      const col2Length = Math.sqrt(rElements[8] * rElements[8] + rElements[9] * rElements[9] + rElements[10] * rElements[10]);
+
+      expect(col2Length).toBeCloseTo(1, 5);
+    });
+
+    it('setPosition', () => {
+      const m = new Matrix4();
+
+      m.setPosition(new Vector3(10, 20, 30));
+
+      expect(m.elements[12]).toEqual(10);
+      expect(m.elements[13]).toEqual(20);
+      expect(m.elements[14]).toEqual(30);
+
+      // 不应影响其他元素
+      expect(m.elements[0]).toEqual(1);  // identity 的旋转部分不变
+      expect(m.elements[5]).toEqual(1);
+      expect(m.elements[10]).toEqual(1);
+      expect(m.elements[15]).toEqual(1);
+    });
+
+    it('特殊分解', () => {
+      const translation = new Vector3();
+      const rotation = new Quaternion();
+      const scale = new Vector3();
+      const matrix = new Matrix4(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 2.3145968103448453, 5.4677423060188755, 0, 1);
+
+      matrix.decompose(translation, rotation, scale);
+      expect(translation.x).toBeCloseTo(2.3145968103448453, 5);
+      expect(translation.y).toBeCloseTo(5.4677423060188755, 5);
+      expect(translation.z).toBeCloseTo(0, 5);
+
+      expect(rotation.x).toBeCloseTo(0, 5);
+      expect(rotation.y).toBeCloseTo(0, 5);
+      expect(rotation.z).toBeCloseTo(0, 5);
+      expect(rotation.w).toBeCloseTo(1, 5);
+
+      expect(scale.x).toBeCloseTo(0, 5);
+      expect(scale.y).toBeCloseTo(0, 5);
+      expect(scale.z).toBeCloseTo(1, 5);
+    });
   });
 });
 
