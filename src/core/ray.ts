@@ -96,6 +96,29 @@ export class Ray {
   }
 
   /**
+   * 光线到平面的距离
+   * @param plane - 平面
+   * @returns 距离值，平行且不在平面上时返回 null，平行且在平面上时返回 0
+   */
+  distanceToPlane (plane: PlaneLike): number | null {
+    const normal = plane.normal as Vector3;
+    const denominator = normal.dot(this.direction);
+
+    if (denominator === 0) {
+      // 光线与平面平行
+      if (normal.dot(this.origin) + plane.distance === 0) {
+        return 0;
+      }
+
+      return null;
+    }
+
+    const t = -(this.origin.dot(normal) + plane.distance) / denominator;
+
+    return t >= 0 ? t : null;
+  }
+
+  /**
    * 根据矩阵对光线进行变换
    * @param m - 变换矩阵
    * @returns
