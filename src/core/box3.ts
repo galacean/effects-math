@@ -6,6 +6,8 @@ import { Vector3 } from './vector3';
  * 三维包围盒
  */
 export class Box3 {
+  private static readonly tempVec0 = new Vector3();
+
   min: Vector3;
   max: Vector3;
 
@@ -318,7 +320,7 @@ export class Box3 {
    */
   intersectsSphere (sphere: Sphere) {
     // Find the point on the AABB closest to the sphere center.
-    const vector = new Vector3();
+    const vector = Box3.tempVec0;
 
     this.clampPoint(sphere.center, vector);
 
@@ -420,11 +422,13 @@ export class Box3 {
    * @returns
    */
   getBoundingSphere (target: Sphere) {
+    if (this.isEmpty()) {
+      return target.makeEmpty();
+    }
+
     this.getCenter(target.center);
 
-    const vector = new Vector3();
-
-    target.radius = this.getSize(vector).length() * 0.5;
+    target.radius = this.getSize(Box3.tempVec0).length() * 0.5;
 
     return target;
   }

@@ -5,6 +5,9 @@ import { Vector2 } from '../core/vector2';
  * 二维圆
  */
 export class Circle {
+  private static readonly tempVec0 = new Vector2();
+  private static readonly tempVec1 = new Vector2();
+
   center: Vector2;
   radius: number;
 
@@ -56,8 +59,8 @@ export class Circle {
    * @returns 置空结果
    */
   makeEmpty (): this {
-    this.center = new Vector2();
-    this.radius = 0;
+    this.center.set(0, 0);
+    this.radius = - 1;
 
     return this;
   }
@@ -67,8 +70,7 @@ export class Circle {
    * @returns 判空结果
    */
   isEmpty (): boolean {
-    // this is a more robust check for empty than ( volume <= 0 ) because volume can get positive with two negative axes
-    return this.radius === 0;
+    return this.radius < 0;
   }
 
   /**
@@ -96,7 +98,19 @@ export class Circle {
    * @returns 扩展结果
    */
   expandByPoint (point: Vector2): this {
-    this.radius = this.center.distance(point);
+    if (this.isEmpty()) {
+      return this.set(point, 0);
+    }
+
+    const offset = Circle.tempVec0.subtractVectors(point, this.center);
+    const distance = offset.length();
+
+    if (distance > this.radius) {
+      const radius = (this.radius + distance) * 0.5;
+
+      this.center.add(offset.multiply((radius - this.radius) / distance));
+      this.radius = radius;
+    }
 
     return this;
   }
@@ -118,7 +132,7 @@ export class Circle {
    * @returns 包含判断结果
    */
   containsPoint (point: Vector2): boolean {
-    return this.center.distance(point) < this.radius;
+    return !this.isEmpty() && this.center.distanceSquared(point) <= this.radius * this.radius;
   }
 
   /**
@@ -127,13 +141,20 @@ export class Circle {
    * @returns 包含判断结果
    */
   containsBox (box: Box2): boolean {
-    for (let i = 0; i < 4; i++) {
-      if (!this.containsPoint(box.corners[i])) {
-        return false;
-      }
+    if (this.isEmpty() || box.isEmpty()) {
+      return false;
     }
 
-    return true;
+    const deltaX = Math.max(
+      Math.abs(box.min.x - this.center.x),
+      Math.abs(box.max.x - this.center.x),
+    );
+    const deltaY = Math.max(
+      Math.abs(box.min.y - this.center.y),
+      Math.abs(box.max.y - this.center.y),
+    );
+
+    return deltaX * deltaX + deltaY * deltaY <= this.radius * this.radius;
   }
 
   /**
@@ -142,14 +163,7 @@ export class Circle {
    * @returns 相交判断结果
    */
   intersectsBox (box: Box2): boolean {
-    // using 4 splitting planes to rule out intersections
-    for (let i = 0; i < 4; i++) {
-      if (this.containsPoint(box.corners[i])) {
-        return true;
-      }
-    }
-
-    return false;
+    return !this.isEmpty() && !box.isEmpty() && box.distanceToPoint(this.center) <= this.radius;
   }
 
   /**
@@ -158,20 +172,35 @@ export class Circle {
    * @returns 距离
    */
   distanceToPoint (point: Vector2): number {
-    return this.center.distance(point) - this.radius;
+    return this.isEmpty() ? Infinity : this.center.distance(point) - this.radius;
   }
 
   /**
-   * 圆求交集
+   * 获取两个圆交集的保守包围圆。部分重叠时，真实交集为透镜形，
+   * 因此结果取两个输入中较小的圆，并不精确表示交集。
    * @param circle - 二维圆
    * @returns 求交结果
    */
   intersect (circle: Circle): this {
-    this.center = this.center.add(circle.center);
-    this.radius = this.radius + circle.radius - this.center.distance(circle.center);
-    this.radius = this.radius < 0 ? 0 : this.radius;
+    if (this.isEmpty() || circle.isEmpty()) {
+      return this.makeEmpty();
+    }
 
-    return this;
+    const distance = this.center.distance(circle.center);
+
+    if (distance > this.radius + circle.radius) {
+      return this.makeEmpty();
+    }
+
+    if (this.radius >= distance + circle.radius) {
+      return this.copyFrom(circle);
+    }
+
+    if (circle.radius >= distance + this.radius) {
+      return this;
+    }
+
+    return this.radius <= circle.radius ? this : this.copyFrom(circle);
   }
 
   /**
@@ -180,8 +209,23 @@ export class Circle {
    * @returns 求并结果
    */
   union (circle: Circle): this {
-    this.center = this.center.add(circle.center);
-    this.radius = (this.radius + circle.radius + this.center.distance(circle.center)) / 2;
+    if (circle.isEmpty()) {
+      return this;
+    }
+
+    if (this.isEmpty()) {
+      return this.copyFrom(circle);
+    }
+
+    if (this.center.equals(circle.center)) {
+      this.radius = Math.max(this.radius, circle.radius);
+    } else {
+      const point = Circle.tempVec0;
+      const offset = Circle.tempVec1.subtractVectors(circle.center, this.center).setLength(circle.radius);
+
+      this.expandByPoint(point.copyFrom(circle.center).add(offset));
+      this.expandByPoint(point.copyFrom(circle.center).subtract(offset));
+    }
 
     return this;
   }

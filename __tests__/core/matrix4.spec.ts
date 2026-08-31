@@ -185,8 +185,8 @@ describe('Maths', () => {
       const a = new Matrix4();
       const b = new Matrix4(
         1, 0, 0, 0,
-        0, 0.7071067811865475, -0.7071067811865475, 0,
         0, 0.7071067811865475, 0.7071067811865475, 0,
+        0, -0.7071067811865475, 0.7071067811865475, 0,
         0, 0, 0, 1
       );
       const eye = new Vector3(0, 0, 0);
@@ -203,9 +203,45 @@ describe('Maths', () => {
         -1, 0, 0, 0,
         0, 1, 0, 0,
         0, 0, -1, 0,
-        0, 0, -5, 1
+        0, 0, 0, 1
       );
       expect(a.equals(b)).toEqual(true);
+
+      const preserved = new Matrix4(
+        1, 2, 3, 4,
+        5, 6, 7, 8,
+        9, 10, 11, 12,
+        13, 14, 15, 16,
+      );
+      const unchanged = [
+        preserved.elements[3], preserved.elements[7], preserved.elements[11],
+        preserved.elements[12], preserved.elements[13], preserved.elements[14], preserved.elements[15],
+      ];
+
+      preserved.lookAt(eye, target, up);
+      expect([
+        preserved.elements[3], preserved.elements[7], preserved.elements[11],
+        preserved.elements[12], preserved.elements[13], preserved.elements[14], preserved.elements[15],
+      ]).toEqual(unchanged);
+    });
+
+    it('lookAt handles degenerate inputs', () => {
+      const samePoint = new Matrix4().lookAt(Vector3.ZERO, Vector3.ZERO, Vector3.Y);
+      const parallelUp = new Matrix4().lookAt(Vector3.ZERO, Vector3.Y, Vector3.Y);
+
+      expect(samePoint.elements.every(Number.isFinite)).toBe(true);
+      expect(parallelUp.elements.every(Number.isFinite)).toBe(true);
+      expect(Math.abs(samePoint.determinant())).toBeCloseTo(1);
+      expect(Math.abs(parallelUp.determinant())).toBeCloseTo(1);
+    });
+
+    it('compose overwrites every matrix element', () => {
+      const matrix = new Matrix4().setZero().compose(Vector3.ZERO, new Quaternion(), Vector3.ONE);
+
+      expect(matrix.isIdentity()).toBe(true);
+
+      matrix.perspective(Math.PI / 3, 1, 0.1, 100).setFromQuaternion(new Quaternion());
+      expect(matrix.isIdentity()).toBe(true);
     });
 
     it('multiply', () => {

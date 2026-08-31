@@ -428,7 +428,7 @@ export class Matrix4 {
   }
 
   /**
-   * 设置相机矩阵
+   * 设置矩阵的朝向旋转部分
    * @param eye - 相机位置
    * @param target - 目标位置
    * @param up - 相机方向
@@ -440,29 +440,41 @@ export class Matrix4 {
     const vZ = Matrix4.tempVec2;
 
     vZ.subtractVectors(eye, target);
+
+    if (vZ.lengthSquared() === 0) {
+      vZ.z = 1;
+    }
+
     vZ.normalize();
     vX.crossVectors(up, vZ);
+
+    if (vX.lengthSquared() === 0) {
+      if (Math.abs(up.z) === 1) {
+        vZ.x += 0.0001;
+      } else {
+        vZ.z += 0.0001;
+      }
+
+      vZ.normalize();
+      vX.crossVectors(up, vZ);
+    }
+
     vX.normalize();
     vY.crossVectors(vZ, vX);
 
     const te = this.elements;
 
     te[0] = vX.x;
-    te[1] = vY.x;
-    te[2] = vZ.x;
-    te[3] = 0;
-    te[4] = vX.y;
+    te[4] = vY.x;
+    te[8] = vZ.x;
+
+    te[1] = vX.y;
     te[5] = vY.y;
-    te[6] = vZ.y;
-    te[7] = 0;
-    te[8] = vX.z;
-    te[9] = vY.z;
+    te[9] = vZ.y;
+
+    te[2] = vX.z;
+    te[6] = vY.z;
     te[10] = vZ.z;
-    te[11] = 0;
-    te[12] = -vX.dot(eye);
-    te[13] = -vY.dot(eye);
-    te[14] = -vZ.dot(eye);
-    te[15] = 1;
 
     return this;
   }
@@ -749,6 +761,7 @@ export class Matrix4 {
     te[12] = l * te[0] + m * te[4] + n * te[8] - l + translation.x;
     te[13] = l * te[1] + m * te[5] + n * te[9] - m + translation.y;
     te[14] = l * te[2] + m * te[6] + n * te[10] - n + translation.z;
+    te[15] = 1;
 
     return this;
   }
@@ -1126,7 +1139,7 @@ export class Matrix4 {
   }
 
   /**
-   * 创建相机矩阵
+   * 创建朝向旋转矩阵
    * @param eye - 相机位置
    * @param target - 目标位置
    * @param up - 相机方向

@@ -479,10 +479,10 @@ export class Color {
   }
 
   toHexString (includeAlpha = true) {
-    const R = Color.ToHex(Math.round(this.r * 255));
-    const G = Color.ToHex(Math.round(this.g * 255));
-    const B = Color.ToHex(Math.round(this.b * 255));
-    const A = Color.ToHex(Math.round(this.a * 255));
+    const R = Color.ToHex(Math.round(Math.min(Math.max(this.r, 0), 1) * 255));
+    const G = Color.ToHex(Math.round(Math.min(Math.max(this.g, 0), 1) * 255));
+    const B = Color.ToHex(Math.round(Math.min(Math.max(this.b, 0), 1) * 255));
+    const A = Color.ToHex(Math.round(Math.min(Math.max(this.a, 0), 1) * 255));
 
     if (includeAlpha) {
       return '#' + R + G + B + A;
@@ -536,15 +536,9 @@ export class Color {
    * @returns 线性空间颜色值
    */
   static gammaToLinear (v: number): number {
-    if (v <= 0.0) {
-      return 0.0;
-    } else if (v <= 0.04045) {
-      return v / 12.92;
-    } else if (v < 1.0) {
-      return Math.pow((v + 0.055) / 1.055, 2.4);
-    } else {
-      return Math.pow(v, 2.4);
-    }
+    return v < 0.04045
+      ? v * 0.0773993808
+      : Math.pow(v * 0.9478672986 + 0.0521327014, 2.4);
   }
 
   /**
@@ -553,15 +547,9 @@ export class Color {
    * @returns Gamma 空间颜色值
    */
   static linearToGamma (value: number): number {
-    if (value <= 0.0) {
-      return 0.0;
-    } else if (value < 0.0031308) {
-      return 12.92 * value;
-    } else if (value < 1.0) {
-      return 1.055 * Math.pow(value, 0.41666) - 0.055;
-    } else {
-      return Math.pow(value, 0.41666);
-    }
+    return value < 0.0031308
+      ? value * 12.92
+      : 1.055 * Math.pow(value, 0.41666) - 0.055;
   }
 
   static ToHex (i: number): string {

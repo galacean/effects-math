@@ -109,7 +109,13 @@ class Spherical {
   }
 
   getCartesianCoords (): Vector3 {
-    return new Vector3();
+    const sinPhiRadius = Math.sin(this.phi) * this.radius;
+
+    return new Vector3(
+      sinPhiRadius * Math.sin(this.theta),
+      Math.cos(this.phi) * this.radius,
+      sinPhiRadius * Math.cos(this.theta),
+    );
   }
 }
 

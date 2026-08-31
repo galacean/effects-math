@@ -23,6 +23,10 @@ export class Plane {
 
     if (length === 0) {
       this.normal.set(0, 0, 1);
+
+      this.distance = distance;
+
+      return this;
     }
 
     this.distance = distance / length;
