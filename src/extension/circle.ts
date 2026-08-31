@@ -127,13 +127,20 @@ export class Circle {
    * @returns 包含判断结果
    */
   containsBox (box: Box2): boolean {
-    for (let i = 0; i < 4; i++) {
-      if (!this.containsPoint(box.corners[i])) {
-        return false;
-      }
+    if (box.isEmpty()) {
+      return false;
     }
 
-    return true;
+    const deltaX = Math.max(
+      Math.abs(box.min.x - this.center.x),
+      Math.abs(box.max.x - this.center.x),
+    );
+    const deltaY = Math.max(
+      Math.abs(box.min.y - this.center.y),
+      Math.abs(box.max.y - this.center.y),
+    );
+
+    return Math.sqrt(deltaX * deltaX + deltaY * deltaY) < this.radius;
   }
 
   /**
@@ -142,14 +149,7 @@ export class Circle {
    * @returns 相交判断结果
    */
   intersectsBox (box: Box2): boolean {
-    // using 4 splitting planes to rule out intersections
-    for (let i = 0; i < 4; i++) {
-      if (this.containsPoint(box.corners[i])) {
-        return true;
-      }
-    }
-
-    return false;
+    return box.distanceToPoint(this.center) <= this.radius;
   }
 
   /**
