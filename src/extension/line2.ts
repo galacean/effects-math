@@ -1,10 +1,22 @@
 import { clamp } from '../core/utils';
 import { Vector2 } from '../core/vector2';
 
+function orientation (a: Vector2, b: Vector2, c: Vector2): number {
+  return (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x);
+}
+
+function onSegment (a: Vector2, b: Vector2, point: Vector2): boolean {
+  return point.x >= Math.min(a.x, b.x) && point.x <= Math.max(a.x, b.x)
+    && point.y >= Math.min(a.y, b.y) && point.y <= Math.max(a.y, b.y);
+}
+
 /**
  * 二维线段
  */
 export class Line2 {
+  private static readonly tempVec0 = new Vector2();
+  private static readonly tempVec1 = new Vector2();
+
   start: Vector2;
   end: Vector2;
 
@@ -105,15 +117,19 @@ export class Line2 {
    * @returns 距离结果
    */
   closestPointToPointParameter (point: Vector2, clampToLine: boolean): number {
-    const startP = new Vector2();
-    const startEnd = new Vector2();
+    const startP = Line2.tempVec0;
+    const startEnd = Line2.tempVec1;
 
     startP.subtractVectors(point, this.start);
     startEnd.subtractVectors(this.end, this.start);
 
     const se2se = startEnd.dot(startEnd);
-    const se2sp = startEnd.dot(startP);
 
+    if (se2se === 0) {
+      return 0;
+    }
+
+    const se2sp = startEnd.dot(startP);
     let t = se2sp / se2se;
 
     if (clampToLine) {
@@ -167,23 +183,19 @@ export class Line2 {
    * @returns 相交判断结果
    */
   crossWithLine (other: Line2): boolean {
-    const vecA = this.delta();
-    const vecB = other.delta();
-    const vecAStart = new Vector2().subtractVectors(other.start, this.start);
-    const vecAEnd = new Vector2().subtractVectors(other.end, this.start);
-    const vecBStart = new Vector2().subtractVectors(this.start, other.start);
-    const vecBEnd = new Vector2().subtractVectors(this.end, other.start);
+    const o1 = orientation(this.start, this.end, other.start);
+    const o2 = orientation(this.start, this.end, other.end);
+    const o3 = orientation(other.start, other.end, this.start);
+    const o4 = orientation(other.start, other.end, this.end);
 
-    const crossA2BStart = vecAStart.cross(vecA);
-    const crossA2BEnd = vecAEnd.cross(vecA);
-
-    const crossB2AStart = vecBStart.cross(vecB);
-    const crossB2AEnd = vecBEnd.cross(vecB);
-
-    if (crossA2BStart * crossA2BEnd < 0 && crossB2AStart * crossB2AEnd < 0) {
+    if ((o1 > 0 && o2 < 0 || o1 < 0 && o2 > 0)
+      && (o3 > 0 && o4 < 0 || o3 < 0 && o4 > 0)) {
       return true;
     }
 
-    return false;
+    return o1 === 0 && onSegment(this.start, this.end, other.start)
+      || o2 === 0 && onSegment(this.start, this.end, other.end)
+      || o3 === 0 && onSegment(other.start, other.end, this.start)
+      || o4 === 0 && onSegment(other.start, other.end, this.end);
   }
 }

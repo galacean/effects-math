@@ -137,7 +137,15 @@ describe('Maths', () => {
       const res = c.toHexString();
 
       expect(res).toEqual('#FF0000FF');
+      expect(new Color(2, -1, 0.5, 3).toHexString()).toEqual('#FF0080FF');
 
+    });
+
+    it('uses one transfer function for HDR components', () => {
+      expect(Color.gammaToLinear(2)).toBeCloseTo(Math.pow(2 * 0.9478672986 + 0.0521327014, 2.4));
+      expect(Color.linearToGamma(2)).toBeCloseTo(1.055 * Math.pow(2, 0.41666) - 0.055);
+      expect(Color.gammaToLinear(-1)).toBeCloseTo(-0.0773993808);
+      expect(Color.linearToGamma(-1)).toBeCloseTo(-12.92);
     });
 
     it('add', () => {

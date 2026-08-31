@@ -143,6 +143,10 @@ describe('Maths', () => {
       b = new Sphere(new Vector3(0, 0, - 1), 4);
       a0.intersectSphere(b, point);
       expect(point.distance(new Vector3(0, 0, - 5)) < TOL).toEqual(true);
+
+      point.copyFrom(posInf3);
+      expect(a0.intersectSphere(new Sphere(), point)).toBeUndefined();
+      expect(point.equals(posInf3)).toBe(true);
     });
 
     it('intersectsSphere', () => {

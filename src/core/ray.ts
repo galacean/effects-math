@@ -239,6 +239,10 @@ export class Ray {
    * @returns
    */
   intersectSphere (sphere: SphereLike, out?: Vector3): Vector3 | undefined {
+    if (sphere.radius < 0) {
+      return;
+    }
+
     const center = sphere.center as Vector3;
     const vector = Ray.tempVec0.subtractVectors(center, this.origin);
     const tca = vector.dot(this.direction);

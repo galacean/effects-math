@@ -6,6 +6,10 @@ import { Vector3 } from './vector3';
  * 球
  */
 export class Sphere {
+  private static readonly tempBox = new Box3();
+  private static readonly tempVec0 = new Vector3();
+  private static readonly tempVec1 = new Vector3();
+
   center: Vector3;
   radius: number;
 
@@ -46,21 +50,19 @@ export class Sphere {
 
     if (optionalCenter !== undefined) {
       center.copyFrom(optionalCenter);
-
-      let maxRadiusSq = 0;
-
-      for (let i = 0; i < points.length; i++) {
-        maxRadiusSq = Math.max(maxRadiusSq, center.distanceSquared(points[i]));
-      }
-
-      this.radius = Math.sqrt(maxRadiusSq);
     } else {
-      const box = new Box3().setFromPoints(points);
+      const box = Sphere.tempBox.setFromPoints(points);
 
       box.getCenter(center);
-
-      this.radius = box.getSize().length() / 2;
     }
+
+    let maxRadiusSq = 0;
+
+    for (let i = 0; i < points.length; i++) {
+      maxRadiusSq = Math.max(maxRadiusSq, center.distanceSquared(points[i]));
+    }
+
+    this.radius = Math.sqrt(maxRadiusSq);
 
     return this;
   }
@@ -111,7 +113,7 @@ export class Sphere {
    * @returns 距离结果
    */
   distanceToPoint (point: Vector3): number {
-    return (point.distance(this.center) - this.radius);
+    return point.distance(this.center) - this.radius;
   }
 
   /**
@@ -216,7 +218,11 @@ export class Sphere {
    * @returns 扩展结果
    */
   expandByPoint (point: Vector3): this {
-    const vector = new Vector3().subtractVectors(point, this.center);
+    if (this.isEmpty()) {
+      return this.set(point, 0);
+    }
+
+    const vector = Sphere.tempVec0.subtractVectors(point, this.center);
     const lengthSquared = vector.lengthSquared();
 
     if (lengthSquared > (this.radius * this.radius)) {
@@ -240,38 +246,53 @@ export class Sphere {
    * @returns 求并结果
    */
   union (sphere: Sphere): this {
-    // To enclose another sphere into this sphere, we only need to enclose two points:
-    // 1) Enclose the farthest point on the other sphere into this sphere.
-    // 2) Enclose the opposite point of the farthest point into this sphere.
-    const v1 = new Vector3();
-    const toFarthestPoint = new Vector3();
+    if (sphere.isEmpty()) {
+      return this;
+    }
 
-    toFarthestPoint.subtractVectors(sphere.center, this.center).normalize().multiply(sphere.radius);
+    if (this.isEmpty()) {
+      return this.copyFrom(sphere);
+    }
 
-    this.expandByPoint(v1.copyFrom(sphere.center).add(toFarthestPoint));
-    this.expandByPoint(v1.copyFrom(sphere.center).subtract(toFarthestPoint));
+    if (this.center.equals(sphere.center)) {
+      this.radius = Math.max(this.radius, sphere.radius);
+    } else {
+      const point = Sphere.tempVec0;
+      const offset = Sphere.tempVec1.subtractVectors(sphere.center, this.center).setLength(sphere.radius);
+
+      this.expandByPoint(point.copyFrom(sphere.center).add(offset));
+      this.expandByPoint(point.copyFrom(sphere.center).subtract(offset));
+    }
 
     return this;
   }
 
   /**
-   * 包围球求交集
+   * 获取两个包围球交集的保守包围球。部分重叠时，真实交集为透镜形，
+   * 因此结果取两个输入中较小的包围球，并不精确表示交集。
    * @param other - 其它包围球
    * @returns 求交结果
    */
   intersect (other: Sphere): this {
-    const vector = new Vector3().subtractVectors(this.center, other.center);
-    const distance = vector.length();
-    const radiusSum = this.radius + other.radius;
-
-    if (distance > radiusSum) {
+    if (this.isEmpty() || other.isEmpty()) {
       return this.makeEmpty();
     }
 
-    this.center = this.center.add(vector.normalize().multiply(distance / 2));
-    this.radius = this.radius + other.radius - distance;
+    const distance = this.center.distance(other.center);
 
-    return this;
+    if (distance > this.radius + other.radius) {
+      return this.makeEmpty();
+    }
+
+    if (this.radius >= distance + other.radius) {
+      return this.copyFrom(other);
+    }
+
+    if (other.radius >= distance + this.radius) {
+      return this;
+    }
+
+    return this.radius <= other.radius ? this : this.copyFrom(other);
   }
 
   /**
